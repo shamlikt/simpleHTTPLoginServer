@@ -1,0 +1,10 @@
+MysqlConfig:
+  Host: "localhost"
+  Port: 3306
+  UserName: "toor"
+  Password: "toor"
+  DataBase: "apiserver"
+
+ServerConfig:
+  JwtKey: "2uioYBOVbZ6uJfHl78hD"
+  LogPath: "/tmp/apiserver.log"
