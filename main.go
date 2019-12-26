@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/simpleHTTPLoginServer/config"
 	"github.com/simpleHTTPLoginServer/pkg/handlers"
 	"github.com/simpleHTTPLoginServer/pkg/mySqlClient"
