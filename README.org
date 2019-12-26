@@ -26,21 +26,20 @@
 
 
 **** Run
-     we need to pass the config as command line parameter as given below,
-     =go run main.go -c system_config= you dont need to pass the .yaml extension
-     or
-     =go build=
-     =simpleHTTPLoginServer -c system_config=
+     - we need to pass the config as command line parameter as given below,
+     - =go run main.go -c system_config= you dont need to pass the .yaml extension
+     - or
+     - =go build=
+     - =simpleHTTPLoginServer -c system_config=
 
 
 **** Api
      
 ***** Create new user
 
-     method: POST
+     method: =POST=
 
-     curl -v  --header "Content-Type: application/json"   --request POST   --data\
-     '{"username":"test","password":"test", "age":10 , "salary":10000, "email":"test@mail.com"}'   http://localhost:9000/user/signup
+     =curl -v  --header "Content-Type: application/json"   --request POST   --data '{"username":"test","password":"test", "age":10 , "salary":10000, "email":"test@mail.com"}'   http://localhost:9000/user/signup=
 
      Response:
      {
@@ -50,10 +49,9 @@
 
 ***** Login user
 
-     method: POST
+     method: =POST=
 
-     curl -v  --header "Content-Type: application/json"   --request POST   --data '{"username":"test","password":"test"}'  \
-     http://localhost:9000/user/login 
+     =curl -v  --header "Content-Type: application/json"   --request POST   --data '{"username":"test","password":"test"}' http://localhost:9000/user/login=
 
      Response:
      {
@@ -66,9 +64,9 @@
 ***** Get Info
      
      Need to pass token as =Auth-token= header
-     method: GET
+     method: =GET=
      
-     curl -v  --header "Auth-token: <token>" http://localhost:9000/user
+     =curl -v  --header "Auth-token: <token>" http://localhost:9000/user=
 
      Response:
      {
@@ -86,6 +84,6 @@
 
 
 **** Need to add
-     unit test
-     swagger api doc
+     - unit test
+     - swagger doc
      
