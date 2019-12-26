@@ -1,0 +1,91 @@
+** Simple Login server
+
+**** Install
+***** Install go packages
+      - =go get golang.org/x/crypto/bcrypt=
+      - =go get github.com/dgrijalva/jwt-go=
+      - =go get github.com/go-sql-driver/mysql=
+      - =go get github.com/thedevsaddam/govalidator=
+
+***** Create table
+      - Create mysql table as below,
+
+      CREATE TABLE `users` (
+      `id` int(6) unsigned NOT NULL AUTO_INCREMENT,
+      `name` varchar(100) NOT NULL UNIQUE,
+      `password` varchar(100) NOT NULL,
+      `email` varchar(50) NOT NULL,
+      `age` int(6) NOT NULL,
+      `salary` int(100) NOT NULL,
+      PRIMARY KEY (`id`)
+      ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+
+***** Change config
+      - All config are stored in a yaml file
+      - change =system_config.yaml= as per the mysql connection parameters
+
+
+**** Run
+     we need to pass the config as command line parameter as given below,
+     =go run main.go -c system_config= you dont need to pass the .yaml extension
+     or
+     =go build=
+     =simpleHTTPLoginServer -c system_config=
+
+
+**** Api
+     
+***** Create new user
+
+     method: POST
+
+     curl -v  --header "Content-Type: application/json"   --request POST   --data\
+     '{"username":"test","password":"test", "age":10 , "salary":10000, "email":"test@mail.com"}'   http://localhost:9000/user/signup
+
+     Response:
+     {
+     "Status": true,
+     "Message": "User Added successfully"
+     }
+
+***** Login user
+
+     method: POST
+
+     curl -v  --header "Content-Type: application/json"   --request POST   --data '{"username":"test","password":"test"}'  \
+     http://localhost:9000/user/login 
+
+     Response:
+     {
+     "Status": true,
+     "Message": "User Authenticated successfully",
+     "Token": "<token>"
+     }
+     
+     
+***** Get Info
+     
+     Need to pass token as =Auth-token= header
+     method: GET
+     
+     curl -v  --header "Auth-token: <token>" http://localhost:9000/user
+
+     Response:
+     {
+     "data": {
+     "username": "test",
+     "password": "",
+     "email": "test@mail.com",
+     "age": 10,
+     "salary": 10000
+     },
+     "status": true,
+     "message": "Got user information "
+     }
+
+
+
+**** Need to add
+     unit test
+     swagger api doc
+     
