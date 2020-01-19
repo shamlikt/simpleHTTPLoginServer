@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-sql-driver/mysql"
-	"github.com/simpleHTTPLoginServer/pkg/mySqlClient"
-	"github.com/simpleHTTPLoginServer/pkg/utils"
+	"github.com/shamlikt/simpleHTTPLoginServer/pkg/mySqlClient"
+	"github.com/shamlikt/simpleHTTPLoginServer/pkg/utils"
 	"github.com/thedevsaddam/govalidator"
 	"net/http"
 )

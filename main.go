@@ -2,9 +2,9 @@ package main
 
 import (
 	"flag"
-	"github.com/simpleHTTPLoginServer/config"
-	"github.com/simpleHTTPLoginServer/pkg/handlers"
-	"github.com/simpleHTTPLoginServer/pkg/mySqlClient"
+	"github.com/shamlikt/simpleHTTPLoginServer/config"
+	"github.com/shamlikt/simpleHTTPLoginServer/pkg/handlers"
+	"github.com/shamlikt/simpleHTTPLoginServer/pkg/mySqlClient"
 	"github.com/spf13/viper"
 	"log"
 	"net/http"

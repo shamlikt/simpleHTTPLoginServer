@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/simpleHTTPLoginServer/pkg/utils"
+	"github.com/shamlikt/simpleHTTPLoginServer/pkg/utils"
 )
 
 const dbDriver string = "mysql"
