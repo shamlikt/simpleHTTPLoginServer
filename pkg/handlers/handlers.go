@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-chi/jwtauth"
 	"github.com/go-sql-driver/mysql"
 	"github.com/shamlikt/simpleHTTPLoginServer/pkg/mySqlClient"
 	"github.com/shamlikt/simpleHTTPLoginServer/pkg/utils"
@@ -26,6 +27,7 @@ type SignUpResult struct {
 type Env struct {
 	JwtKey      []byte
 	Mysqlclient *mySqlClient.Client
+	TokenAuth   *jwtauth.JWTAuth
 }
 
 func (env *Env) SignUp(w http.ResponseWriter, r *http.Request) {
@@ -54,43 +56,29 @@ func (env *Env) SignUp(w http.ResponseWriter, r *http.Request) {
 	v := govalidator.New(opts)
 	e := v.ValidateJSON()
 
-	if len(e) != 0 {
-		result.Status = false
-		result.Message = e.Encode()
-		resultJson, _ := json.Marshal(result)
-		w.Write(resultJson)
-		return
-	}
-
 	w.Header().Set("Content-type", "applciation/json")
 	if len(e) != 0 {
-		result.Status = false
-		result.Message = e.Encode()
-		resultJson, _ := json.Marshal(result)
-		w.Write(resultJson)
+		respondWithError(w, 400, "Bad request")
 		return
 	}
 
-	fmt.Println(env.Mysqlclient)
 	err := env.Mysqlclient.InsertUser(user)
 	if err != nil {
 		if mysqlError, ok := err.(*mysql.MySQLError); ok {
 			if mysqlError.Number == 1062 {
 				result.Status = false
 				result.Message = "The user already registered"
-				resultJson, _ := json.Marshal(result)
-				w.Write(resultJson)
+				respondwithJSON(w, 403, result)
 				return
 			}
 		}
-		w.WriteHeader(http.StatusInternalServerError)
+		respondWithError(w, 500, "Internal Error")
 		return
 	}
 
 	result.Status = true
 	result.Message = "User Added successfully"
-	resultJson, _ := json.Marshal(result)
-	w.Write(resultJson)
+	respondwithJSON(w, 200, result)
 	return
 
 }
@@ -119,10 +107,7 @@ func (env *Env) LogIn(w http.ResponseWriter, r *http.Request) {
 	e := v.ValidateJSON()
 
 	if len(e) != 0 {
-		result.Status = false
-		result.Message = e.Encode()
-		resultJson, _ := json.Marshal(result)
-		w.Write(resultJson)
+		respondWithError(w, 400, "Bad request")
 		return
 	}
 
@@ -133,43 +118,33 @@ func (env *Env) LogIn(w http.ResponseWriter, r *http.Request) {
 	isValid, err := env.Mysqlclient.ValidateUser(username, password)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			result.Status = false
-			result.Message = "No User Found"
-			resultJson, _ := json.Marshal(result)
-			w.Write(resultJson)
-			w.WriteHeader(http.StatusUnauthorized)
+			respondWithError(w, 403, "User not found")
 			return
 
 		}
-		w.WriteHeader(http.StatusInternalServerError)
+		respondWithError(w, 500, "internal error")
 		return
 	}
 
 	if !isValid {
-		result.Status = false
-		result.Message = "Incorrect username or password"
-		resultJson, _ := json.Marshal(result)
-		w.Write(resultJson)
-		w.WriteHeader(http.StatusUnauthorized)
+		respondWithError(w, 403, "Incorrect username or password")
 		return
 	}
-	tokenStr, err := utils.ClaimsJWT(username, env.JwtKey)
 
+	_, tokenStr, _ := env.TokenAuth.Encode(jwt.MapClaims{"username": username})
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		respondWithError(w, 500, "internal error")
 		return
 	}
 
 	result.Status = true
 	result.Token = tokenStr
 	result.Message = "User Authenticated successfully"
-	resultJson, _ := json.Marshal(result)
-	w.Write(resultJson)
+	respondwithJSON(w, 200, result)
 	return
 }
 
 func (env *Env) GetUserInfo(w http.ResponseWriter, r *http.Request) {
-
 	var result utils.UserInfoResult
 	var userInfo utils.UserInfo
 
@@ -178,59 +153,34 @@ func (env *Env) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token := r.Header.Get("Auth-token")
-	w.Header().Set("Content-type", "applciation/json")
+	_, claims, _ := jwtauth.FromContext(r.Context())
+	username, err := claims["username"].(string)
 
-	if token == "" {
-		result.Status = false
-		result.Message = "Auth-token: Header not found"
-		resultJson, _ := json.Marshal(result)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(resultJson)
+	if err != true {
+		respondWithError(w, 400, "Bad request")
 		return
 	}
 
-	claims := &utils.Claims{}
-	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-		return env.JwtKey, nil
-	})
-
-	if !tkn.Valid {
-		result.Status = false
-		result.Message = "Invalid token"
-		resultJson, _ := json.Marshal(result)
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write(resultJson)
-		return
-	}
-	if err != nil {
-		if err == jwt.ErrSignatureInvalid {
-			result.Status = false
-			result.Message = "Invalid token"
-			resultJson, _ := json.Marshal(result)
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write(resultJson)
-			return
-		}
-		result.Status = false
-		result.Message = "Bad Request"
-		resultJson, _ := json.Marshal(result)
-		w.Write(resultJson)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	err = env.Mysqlclient.GetUserData(claims.Username, &userInfo)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	dberr := env.Mysqlclient.GetUserData(username, &userInfo)
+	if dberr != nil {
+		respondWithError(w, 500, "Internal server error")
 	}
 
 	result.Status = true
 	result.UserInfo = userInfo
 	result.Message = "Got user information "
-	resultJson, _ := json.Marshal(result)
-	w.Write(resultJson)
+	respondwithJSON(w, 200, result)
 	return
 
+}
+
+func respondwithJSON(w http.ResponseWriter, code int, payload interface{}) {
+	response, _ := json.Marshal(payload)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	w.Write(response)
+}
+
+func respondWithError(w http.ResponseWriter, code int, msg string) {
+	respondwithJSON(w, code, map[string]string{"message": msg})
 }

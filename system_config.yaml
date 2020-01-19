@@ -7,4 +7,4 @@ MysqlConfig:
 
 ServerConfig:
   JwtKey: "2uioYBOVbZ6uJfHl78hD"
-  LogPath: "/tmp/apiserver.log"
+  LogPath: "apiserver.log"
