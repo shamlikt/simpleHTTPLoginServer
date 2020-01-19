@@ -2,14 +2,9 @@
 
 **** Install
 ***** Install go packages
-      - =go get golang.org/x/crypto/bcrypt=
-      - =go get github.com/dgrijalva/jwt-go=
-      - =go get github.com/go-sql-driver/mysql=
-      - =go get github.com/thedevsaddam/govalidator=
-
+      =go get github.com/shamlikt/simpleHTTPLoginServer=
 ***** Create table
-      - Create mysql table as below,
-
+  - Create mysql table as below,
       CREATE TABLE `users` (
       `id` int(6) unsigned NOT NULL AUTO_INCREMENT,
       `name` varchar(100) NOT NULL UNIQUE,
@@ -27,11 +22,7 @@
 
 **** Run
      - we need to pass the config as command line parameter as given below,
-     - =go run main.go -c system_config= you dont need to pass the .yaml extension
-     - or
-     - =go build=
-     - =simpleHTTPLoginServer -c system_config=
-
+     - =simpleHTTPLoginServer -c system_config.yaml=
 
 **** Api
      
@@ -39,7 +30,7 @@
 
      method: =POST=
 
-     =curl -v  --header "Content-Type: application/json"   --request POST   --data '{"username":"test","password":"test", "age":10 , "salary":10000, "email":"test@mail.com"}'   http://localhost:9000/user/signup=
+     =curl -v  --header "Content-Type: application/json"   --request POST   --data '{"username":"test","password":"test", "age":10 , "salary":10000, "email":"test@mail.com"}'   http://localhost:9000/signup=
 
      Response:
      {
@@ -51,7 +42,7 @@
 
      method: =POST=
 
-     =curl -v  --header "Content-Type: application/json"   --request POST   --data '{"username":"test","password":"test"}' http://localhost:9000/user/login=
+     =curl -v  --header "Content-Type: application/json"   --request POST   --data '{"username":"test","password":"test"}' http://localhost:9000/login=
 
      Response:
      {
@@ -60,13 +51,12 @@
      "Token": "<token>"
      }
      
-     
 ***** Get Info
      
      Need to pass token as =Auth-token= header
      method: =GET=
      
-     =curl -v  --header "Auth-token: <token>" http://localhost:9000/user=
+     =curl -H"Authorization: BEARER <token>" -v http://localhost:9000/data=
 
      Response:
      {

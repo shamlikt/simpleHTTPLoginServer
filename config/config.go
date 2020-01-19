@@ -6,25 +6,29 @@ import (
 )
 
 type mysqlConfig struct {
-	Host     string
-	Port     int
-	UserName string
-	Password string
-	DataBase string
+	Host     string `yaml:"Host"`
+	Port     int    `yaml:"Port"`
+	UserName string `yaml:"UserName"`
+	Password string `yaml:"Password"`
+	DataBase string `yaml:"DataBase"`
 }
 
 type serverConfig struct {
-	JwtKey  string
-	LogPath string
+	JwtKey  string `yaml:"MysqlConfig"`
+	LogPath string `yaml:"LogPath"`
 }
 
-type SystemConig struct {
-	MysqlConfig  mysqlConfig
-	ServerConfig serverConfig
+type systemConig struct {
+	MysqlConfig  mysqlConfig  `yaml:"MysqlConfig"`
+	ServerConfig serverConfig `yaml:"ServerConfig"`
 }
 
-func ParseConfig(fileName string) (SystemConig, error) {
-	var config SystemConig
+type Config struct {
+	Config systemConig `yaml:"Config"`
+}
+
+func ParseConfig(fileName string) (Config, error) {
+	var config Config
 	data, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		return config, err

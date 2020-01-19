@@ -25,20 +25,22 @@ func main() {
 		log.Fatal("No config file found, Please use --help command")
 	}
 
-	conf, err := config.ParseConfig(configFile)
+	c, err := config.ParseConfig(configFile)
 	if err != nil {
 		// log.Fatal("Error while parsing config")
 		log.Fatal(err)
 
 	}
 
-	mysqlHost := conf.MysqlConfig.Host
-	mysqlPort := conf.MysqlConfig.Port
-	username := conf.MysqlConfig.UserName
-	password := conf.MysqlConfig.Password
-	dbName := conf.MysqlConfig.DataBase
+	mysqlHost := c.Config.MysqlConfig.Host
+	mysqlPort := c.Config.MysqlConfig.Port
+	username := c.Config.MysqlConfig.UserName
+	password := c.Config.MysqlConfig.Password
+	dbName := c.Config.MysqlConfig.DataBase
+	fmt.Println(mysqlHost)
+	fmt.Println(mysqlPort)
 
-	env.TokenAuth = jwtauth.New("HS256", []byte(conf.ServerConfig.JwtKey), nil)
+	env.TokenAuth = jwtauth.New("HS256", []byte(c.Config.ServerConfig.JwtKey), nil)
 	env.Mysqlclient = &mySqlClient.Client{mysqlHost,
 		mysqlPort,
 		username,
@@ -65,12 +67,10 @@ func main() {
 	})
 
 	r.Group(func(r chi.Router) {
-		r.Use(jwtauth.Verifier(tokenAuth))
+		r.Use(jwtauth.Verifier(env.TokenAuth))
 		r.Use(jwtauth.Authenticator)
-		r.Post("/data", func(w http.ResponseWriter, r *http.Request) {
-			_, claims, _ := jwtauth.FromContext(r.Context())
-			w.Write([]byte(fmt.Sprintf("protected area. hi %v", claims["user_id"])))
-		})
+		r.Get("/data", env.GetUserInfo)
+
 	})
 
 	log.Print("Listening on port: 9000")

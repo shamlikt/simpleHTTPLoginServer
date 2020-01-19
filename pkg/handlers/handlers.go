@@ -61,7 +61,6 @@ func (env *Env) SignUp(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, 400, "Bad request")
 		return
 	}
-
 	err := env.Mysqlclient.InsertUser(user)
 	if err != nil {
 		if mysqlError, ok := err.(*mysql.MySQLError); ok {
@@ -113,8 +112,7 @@ func (env *Env) LogIn(w http.ResponseWriter, r *http.Request) {
 
 	username := auth.UserName
 	password := auth.Password
-	fmt.Println(username)
-	fmt.Println(password)
+
 	isValid, err := env.Mysqlclient.ValidateUser(username, password)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -145,6 +143,7 @@ func (env *Env) LogIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (env *Env) GetUserInfo(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("sss")
 	var result utils.UserInfoResult
 	var userInfo utils.UserInfo
 

@@ -50,6 +50,7 @@ func (c Client) InsertUser(userInfo utils.UserInfo) (err error) {
 func (c Client) ValidateUser(username string, password string) (isValid bool, err error) {
 	userStmt, err := c.DbConn.Prepare("SELECT password FROM users WHERE name = ?")
 	if err != nil {
+		fmt.Println(err)
 		return false, err
 	}
 	defer userStmt.Close()
